@@ -39,8 +39,8 @@ migrate = Migrate(app, db)
 
 
 Show = db.Table('Show',
-  db.Column('artist_id', db.Integer, db.ForeignKey('Artist.id'), primary_key=True),
-  db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id'), primary_key=True),
+  db.Column('artist_id', db.Integer, db.ForeignKey('Artist.id') ),
+  db.Column('venue_id', db.Integer, db.ForeignKey('Venue.id')),
   db.Column('start_time',db.DateTime, nullable=False)
 ) 
 class Venue(db.Model):
@@ -68,7 +68,7 @@ class Artist(db.Model):
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
+    genres = db.Column(db.ARRAY(db.String()))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     website = db.Column(db.String(120))
@@ -252,7 +252,7 @@ def create_venue_submission():
     phone = request.form['phone']
     image_link = request.form['image_link']
     facebook_link = request.form['facebook_link']
-    genres = request.form['genres']
+    genres = request.form.getlist('genres')
     website = request.form['website']
     if not request.form['seeking_talent']:
      seeking_talent = False
@@ -474,15 +474,15 @@ def edit_artist_submission(artist_id):
     artist=session.query(Artist).\
     filter(Artist.id == artist_id).first()
 
-    artist.name = request.form['name'],
-    artist.city = request.form['city'],
-    artist.state = request.form['state'],
-    artist.phone = request.form['phone'],
-    artist.genres = request.form['genres'],
-    artist.image_link = request.form['image_link'],
-    artist.facebook_link = request.form['facebook_link'],
-    artist.website = request.form['website'],
-    artist.seeking_venue = seeking_venue,
+    artist.name = request.form['name']
+    artist.city = request.form['city']
+    artist.state = request.form['state']
+    artist.phone = request.form['phone']
+    artist.genres = request.form.getlist('genres')
+    artist.image_link = request.form['image_link']
+    artist.facebook_link = request.form['facebook_link']
+    artist.website = request.form['website']
+    artist.seeking_venue = seeking_venue
     artist.seeking_description = request.form['seeking_description']
 
     db.session.commit()
@@ -536,16 +536,16 @@ def edit_venue_submission(venue_id):
     venue=session.query(Venue).\
     filter(Venue.id == venue_id_id).first()
  
-    venue.name = request.form['name'],
-    venue.address = request.form['address'],
-    venue.city = request.form['city'],
-    venue.state = request.form['state'],
-    venue.phone = request.form['phone'],
-    venue.genres = request.form['genres'],
-    venue.image_link = request.form['image_link'],
-    venue.facebook_link = request.form['facebook_link'],
-    venue.website = request.form['website'],
-    venue.seeking_talent = seeking_talentxs,
+    venue.name = request.form['name']
+    venue.address = request.form['address']
+    venue.city = request.form['city']
+    venue.state = request.form['state']
+    venue.phone = request.form['phone']
+    venue.genres =request.form.getlist('genres')
+    venue.image_link = request.form['image_link']
+    venue.facebook_link = request.form['facebook_link']
+    venue.website = request.form['website']
+    venue.seeking_talent = seeking_talent
     Venue.seeking_description = request.form['seeking_description']
 
     db.session.commit()
@@ -583,7 +583,7 @@ def create_artist_submission():
     phone = request.form['phone']
     image_link = request.form['image_link']
     facebook_link = request.form['facebook_link']
-    genres = request.form['genres']
+    genres = request.form.getlist('genres')
     website = request.form['website']
     if not request.form['seeking_venue']:
      seeking_venue = False
@@ -645,7 +645,7 @@ def shows():
     "Artist_image_link": d.Artist.image_link,
     "start_time": d.start_time.strftime('%Y-%m-%d %H:%M:%S')
   }) 
-  print("astriiiist",d.Artist.name)
+ 
   return render_template('pages/shows.html', shows=data)
 
 @app.route('/shows/create')
@@ -663,15 +663,15 @@ def create_show_submission():
   error = False
   try:
     #create the show 
-    artist_id = request.form['artist_id']
-    venue_id = request.form['venue_id']
-    start_time = request.form['start_time']
+    a_id = request.form['artist_id']
+    v_id = request.form['venue_id']
+    s_time = request.form['start_time']
     
     
     statement = Show.insert().values(
-    artist_id=artist_id,
-    venue_id=venue_id,
-    start_time=start_time)
+    artist_id=a_id,
+    venue_id=v_id,
+    start_time=s_time)
     db.session.execute(statement)
     db.session.commit()
     
